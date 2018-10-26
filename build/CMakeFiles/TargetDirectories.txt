@@ -1,0 +1,3 @@
+/home/hollan/dev/openglproj/build/CMakeFiles/rebuild_cache.dir
+/home/hollan/dev/openglproj/build/CMakeFiles/geosim.dir
+/home/hollan/dev/openglproj/build/CMakeFiles/edit_cache.dir
