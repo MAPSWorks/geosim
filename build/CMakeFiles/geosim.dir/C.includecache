@@ -6,7 +6,7 @@
 
 #IncludeRegexTransform: 
 
-/home/hollan/dev/openglproj/glad.c
+/home/hollan/dev/openglproj/src/glad.c
 stdio.h
 -
 stdlib.h

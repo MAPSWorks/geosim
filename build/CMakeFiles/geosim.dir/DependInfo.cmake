@@ -5,22 +5,25 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_C
-  "/home/hollan/dev/openglproj/glad.c" "/home/hollan/dev/openglproj/build/CMakeFiles/geosim.dir/glad.c.o"
+  "/home/hollan/dev/openglproj/src/glad.c" "/home/hollan/dev/openglproj/build/CMakeFiles/geosim.dir/src/glad.c.o"
   )
 set(CMAKE_C_COMPILER_ID "GNU")
 
 # The include file search paths:
 set(CMAKE_C_TARGET_INCLUDE_PATH
   "/usr/local/include"
+  "../include"
   )
 set(CMAKE_DEPENDS_CHECK_CXX
-  "/home/hollan/dev/openglproj/main.cpp" "/home/hollan/dev/openglproj/build/CMakeFiles/geosim.dir/main.cpp.o"
+  "/home/hollan/dev/openglproj/src/main.cpp" "/home/hollan/dev/openglproj/build/CMakeFiles/geosim.dir/src/main.cpp.o"
+  "/home/hollan/dev/openglproj/src/shader.cpp" "/home/hollan/dev/openglproj/build/CMakeFiles/geosim.dir/src/shader.cpp.o"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")
 
 # The include file search paths:
 set(CMAKE_CXX_TARGET_INCLUDE_PATH
   "/usr/local/include"
+  "../include"
   )
 
 # Targets to which this target links.

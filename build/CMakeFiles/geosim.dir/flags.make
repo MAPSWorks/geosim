@@ -7,11 +7,11 @@ C_FLAGS = -g
 
 C_DEFINES = 
 
-C_INCLUDES = -I/usr/local/include 
+C_INCLUDES = -I/usr/local/include -I/home/hollan/dev/openglproj/include 
 
 CXX_FLAGS = -g   -std=gnu++14
 
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/usr/local/include 
+CXX_INCLUDES = -I/usr/local/include -I/home/hollan/dev/openglproj/include 
 

@@ -123,59 +123,86 @@ geosim/fast:
 	$(MAKE) -f CMakeFiles/geosim.dir/build.make CMakeFiles/geosim.dir/build
 .PHONY : geosim/fast
 
-glad.o: glad.c.o
+src/glad.o: src/glad.c.o
 
-.PHONY : glad.o
-
-# target to build an object file
-glad.c.o:
-	$(MAKE) -f CMakeFiles/geosim.dir/build.make CMakeFiles/geosim.dir/glad.c.o
-.PHONY : glad.c.o
-
-glad.i: glad.c.i
-
-.PHONY : glad.i
-
-# target to preprocess a source file
-glad.c.i:
-	$(MAKE) -f CMakeFiles/geosim.dir/build.make CMakeFiles/geosim.dir/glad.c.i
-.PHONY : glad.c.i
-
-glad.s: glad.c.s
-
-.PHONY : glad.s
-
-# target to generate assembly for a file
-glad.c.s:
-	$(MAKE) -f CMakeFiles/geosim.dir/build.make CMakeFiles/geosim.dir/glad.c.s
-.PHONY : glad.c.s
-
-main.o: main.cpp.o
-
-.PHONY : main.o
+.PHONY : src/glad.o
 
 # target to build an object file
-main.cpp.o:
-	$(MAKE) -f CMakeFiles/geosim.dir/build.make CMakeFiles/geosim.dir/main.cpp.o
-.PHONY : main.cpp.o
+src/glad.c.o:
+	$(MAKE) -f CMakeFiles/geosim.dir/build.make CMakeFiles/geosim.dir/src/glad.c.o
+.PHONY : src/glad.c.o
 
-main.i: main.cpp.i
+src/glad.i: src/glad.c.i
 
-.PHONY : main.i
+.PHONY : src/glad.i
 
 # target to preprocess a source file
-main.cpp.i:
-	$(MAKE) -f CMakeFiles/geosim.dir/build.make CMakeFiles/geosim.dir/main.cpp.i
-.PHONY : main.cpp.i
+src/glad.c.i:
+	$(MAKE) -f CMakeFiles/geosim.dir/build.make CMakeFiles/geosim.dir/src/glad.c.i
+.PHONY : src/glad.c.i
 
-main.s: main.cpp.s
+src/glad.s: src/glad.c.s
 
-.PHONY : main.s
+.PHONY : src/glad.s
 
 # target to generate assembly for a file
-main.cpp.s:
-	$(MAKE) -f CMakeFiles/geosim.dir/build.make CMakeFiles/geosim.dir/main.cpp.s
-.PHONY : main.cpp.s
+src/glad.c.s:
+	$(MAKE) -f CMakeFiles/geosim.dir/build.make CMakeFiles/geosim.dir/src/glad.c.s
+.PHONY : src/glad.c.s
+
+src/main.o: src/main.cpp.o
+
+.PHONY : src/main.o
+
+# target to build an object file
+src/main.cpp.o:
+	$(MAKE) -f CMakeFiles/geosim.dir/build.make CMakeFiles/geosim.dir/src/main.cpp.o
+.PHONY : src/main.cpp.o
+
+src/main.i: src/main.cpp.i
+
+.PHONY : src/main.i
+
+# target to preprocess a source file
+src/main.cpp.i:
+	$(MAKE) -f CMakeFiles/geosim.dir/build.make CMakeFiles/geosim.dir/src/main.cpp.i
+.PHONY : src/main.cpp.i
+
+src/main.s: src/main.cpp.s
+
+.PHONY : src/main.s
+
+# target to generate assembly for a file
+src/main.cpp.s:
+	$(MAKE) -f CMakeFiles/geosim.dir/build.make CMakeFiles/geosim.dir/src/main.cpp.s
+.PHONY : src/main.cpp.s
+
+src/shader.o: src/shader.cpp.o
+
+.PHONY : src/shader.o
+
+# target to build an object file
+src/shader.cpp.o:
+	$(MAKE) -f CMakeFiles/geosim.dir/build.make CMakeFiles/geosim.dir/src/shader.cpp.o
+.PHONY : src/shader.cpp.o
+
+src/shader.i: src/shader.cpp.i
+
+.PHONY : src/shader.i
+
+# target to preprocess a source file
+src/shader.cpp.i:
+	$(MAKE) -f CMakeFiles/geosim.dir/build.make CMakeFiles/geosim.dir/src/shader.cpp.i
+.PHONY : src/shader.cpp.i
+
+src/shader.s: src/shader.cpp.s
+
+.PHONY : src/shader.s
+
+# target to generate assembly for a file
+src/shader.cpp.s:
+	$(MAKE) -f CMakeFiles/geosim.dir/build.make CMakeFiles/geosim.dir/src/shader.cpp.s
+.PHONY : src/shader.cpp.s
 
 # Help Target
 help:
@@ -186,12 +213,15 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... geosim"
 	@echo "... edit_cache"
-	@echo "... glad.o"
-	@echo "... glad.i"
-	@echo "... glad.s"
-	@echo "... main.o"
-	@echo "... main.i"
-	@echo "... main.s"
+	@echo "... src/glad.o"
+	@echo "... src/glad.i"
+	@echo "... src/glad.s"
+	@echo "... src/main.o"
+	@echo "... src/main.i"
+	@echo "... src/main.s"
+	@echo "... src/shader.o"
+	@echo "... src/shader.i"
+	@echo "... src/shader.s"
 .PHONY : help
 
 

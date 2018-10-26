@@ -6,12 +6,26 @@
 
 #IncludeRegexTransform: 
 
-/home/hollan/dev/openglproj/main.cpp
+../include/shader.hpp
+
+/home/hollan/dev/openglproj/src/main.cpp
 iostream
 -
 glad/glad.h
 -
 GLFW/glfw3.h
+-
+shader.hpp
+/home/hollan/dev/openglproj/src/shader.hpp
+
+/home/hollan/dev/openglproj/src/shader.cpp
+glad/glad.h
+-
+GLFW/glfw3.h
+-
+shader.hpp
+-
+iostream
 -
 
 /usr/local/include/GLFW/glfw3.h
