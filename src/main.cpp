@@ -3,6 +3,8 @@
 #include <GLFW/glfw3.h>
 #include "shader.hpp"
 #include <cmath>
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 //callback prototype for when the window changes
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow *window);
@@ -45,18 +47,17 @@ int main()
     //setup shader program
     unsigned int programID = loadShader();
     //new shader class
-    Shader ourShader("../shader.vs","../shader.fs");
-
+    Shader ourShader("../shaders/shader.vs","../shaders/shader.fs");
     int nrt;
-    glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nrt);
-    std::cout << "Maximum nr of vertex attributes supported: " << nrt << std::endl;
-
-	//vertex array
-	float vertices[] = {
-    		0.5f, 0.5f, 0.0f,1.0f,0.0f,0.0f,
-     		0.5f, -0.5f, 0.0f,0.0f,1.0f,0.0f,
-     		-0.5f,  -0.5f, 0.0f,0.0f,0.0f,1.0f,
-            -0.5f, 0.5f, 0.0f,1.0f,0.0f,1.0f
+    glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nrt); 
+    std::cout << "Maximum nr of vertex attributes supported: " << nrt << std::endl; 
+    //vertex array 
+    float vertices[] = { 
+        //positions      //color
+    		0.5f, 0.5f, 0.0f,1.0f,0.0f,0.0f,1.0f,1.0f,
+     		0.5f, -0.5f, 0.0f,0.0f,1.0f,0.0f,1.0f,0.0f,
+     		-0.5f,  -0.5f, 0.0f,0.0f,0.0f,1.0f,0.0f,0.0f,
+            -0.5f, 0.5f, 0.0f,1.0f,0.0f,1.0f,0.0f,1.0f
 	};
 
     unsigned int indices[] = {
@@ -80,12 +81,42 @@ int main()
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     //position attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
     
     //color attribute
-    glVertexAttribPointer(1,3, GL_FLOAT, GL_FALSE,6*sizeof(float),(void *)(3*sizeof(float)));
+    glVertexAttribPointer(1,3, GL_FLOAT, GL_FALSE,8*sizeof(float),(void *)(3*sizeof(float)));
     glEnableVertexAttribArray(1);
+
+    //texture attribute
+    glVertexAttribPointer(2,2,GL_FLOAT, GL_FALSE, 8*sizeof(float),(void*)(6*sizeof(float)));
+    glEnableVertexAttribArray(2);
+
+    //load and create a texture
+    unsigned int texture;
+    glGenTextures(1,&texture);
+    glBindTexture(GL_TEXTURE_2D, texture);//all upcoming GL_TEXTURE_2D operations now have effect on this texture
+    //set the texture wrapping parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    //set texture filtering parameters
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    // load image, create texture and generate mipmaps
+    int width, height, nrChannels;
+    //the FileSystem::getPath(...) is part of the github repository so we can find files on any IDE/platform;
+    //unsigned char* data = stbi_load(FileSystem::getPath("../textures/container.jpg").c_str(), &width, &height, &nrChannels,0);
+    unsigned char* data = stbi_load("../textures/container.jpg", &width, &height, &nrChannels,0);
+    if(data)
+    {
+        glTexImage2D(GL_TEXTURE_2D,0,GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else
+    {
+        std::cout << "Failed to load texture" << std::endl;
+    }
+    stbi_image_free(data);
     // note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind
     glBindBuffer(GL_ARRAY_BUFFER, 0); 
     
@@ -104,7 +135,9 @@ int main()
 		glClear(GL_COLOR_BUFFER_BIT);
 		//input
 		processInput(window);
-
+        
+        //bind Texture
+        glBindTexture(GL_TEXTURE_2D,texture);
         //Rendering
         //glUseProgram(programID);
         ourShader.use();

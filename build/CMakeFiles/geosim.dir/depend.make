@@ -6,6 +6,7 @@ CMakeFiles/geosim.dir/src/glad.c.o: /usr/local/include/KHR/khrplatform.h
 CMakeFiles/geosim.dir/src/glad.c.o: /usr/local/include/glad/glad.h
 
 CMakeFiles/geosim.dir/src/main.cpp.o: ../include/shader.hpp
+CMakeFiles/geosim.dir/src/main.cpp.o: ../include/stb_image.h
 CMakeFiles/geosim.dir/src/main.cpp.o: ../src/main.cpp
 CMakeFiles/geosim.dir/src/main.cpp.o: /usr/local/include/GLFW/glfw3.h
 CMakeFiles/geosim.dir/src/main.cpp.o: /usr/local/include/KHR/khrplatform.h
