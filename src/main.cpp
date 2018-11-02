@@ -5,6 +5,9 @@
 #include <cmath>
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 //callback prototype for when the window changes
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow *window);
@@ -17,6 +20,15 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 int main()
 {
 	std::cout << "Program started...\n";
+    //Testing matrix transformation
+    //std::cout << "Testing matrix transformation\n";
+    //glm::vec4 vec(1.0f, 0.0f, 0.0f, 1.0f);
+    //glm::mat4 trans = glm::mat4(1.0f);
+    //trans = glm::translate(trans, glm::vec3(1.0f, 1.0f, 0.0f));
+    //vec = trans * vec;
+    //std::cout << vec.x << vec.y << vec.z << std::endl;
+    //std::cout << "End of testing.." << std::endl;
+    //end of testing 
 	glfwInit();
     	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -51,6 +63,7 @@ int main()
     int nrt;
     glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nrt); 
     std::cout << "Maximum nr of vertex attributes supported: " << nrt << std::endl; 
+
     //vertex array 
     float vertices[] = { 
         //positions      //color
@@ -96,6 +109,7 @@ int main()
     unsigned int texture;
     glGenTextures(1,&texture);
     glBindTexture(GL_TEXTURE_2D, texture);//all upcoming GL_TEXTURE_2D operations now have effect on this texture
+    
     //set the texture wrapping parameters
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -106,10 +120,37 @@ int main()
     int width, height, nrChannels;
     //the FileSystem::getPath(...) is part of the github repository so we can find files on any IDE/platform;
     //unsigned char* data = stbi_load(FileSystem::getPath("../textures/container.jpg").c_str(), &width, &height, &nrChannels,0);
+    stbi_set_flip_vertically_on_load(true);
     unsigned char* data = stbi_load("../textures/container.jpg", &width, &height, &nrChannels,0);
     if(data)
     {
         glTexImage2D(GL_TEXTURE_2D,0,GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else
+    {
+        std::cout << "Failed to load texture" << std::endl;
+    }
+    stbi_image_free(data);
+    
+    //TEXTURE 2 STUFF!
+    unsigned int mytexture2;
+    glGenTextures(1,&mytexture2);
+    glBindTexture(GL_TEXTURE_2D, mytexture2);
+    
+    // set the texture wrapping parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    // set texture filtering parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    // load image, create texture and generate mipmaps
+    stbi_set_flip_vertically_on_load(true);
+    data = stbi_load("../textures/awesomeface.png", &width, &height, &nrChannels, 0);
+    if (data)
+    {
+        // note that the awesomeface.png has transparency and thus an alpha channel, so make sure to tell OpenGL the data type is of GL_RGBA
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
     }
     else
@@ -127,7 +168,8 @@ int main()
 
     // uncomment this call to draw in wireframe polygons.
    // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
+    ourShader.use();
+    ourShader.setInt("texture2",1);
 	while(!glfwWindowShouldClose(window))
 	{
 		//clear the color buffer
@@ -137,11 +179,24 @@ int main()
 		processInput(window);
         
         //bind Texture
+        glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D,texture);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D,mytexture2);
+
+
         //Rendering
         //glUseProgram(programID);
         ourShader.use();
-
+        
+        //SETTING TRANSFORMATION MATRIX
+        glm::mat4 trans = glm::mat4(1.0f);
+        trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
+        trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+        //trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
+        //QUERY LOCATION IN SHADER PROGRAM
+        unsigned int transformLoc = glGetUniformLocation(ourShader.ID, "transform");
+        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
         /*float timeValue = glfwGetTime();
         float greenValue = sin(timeValue) /2.0f + 0.5f;
         int vertexColorLocation = glGetUniformLocation(programID, "ourColor");
