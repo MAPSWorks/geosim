@@ -13,10 +13,12 @@ set(CMAKE_C_COMPILER_ID "GNU")
 set(CMAKE_C_TARGET_INCLUDE_PATH
   "/usr/local/include"
   "../include"
+  "../../filestut/data"
   )
 set(CMAKE_DEPENDS_CHECK_CXX
   "/home/hollan/dev/openglproj/src/main.cpp" "/home/hollan/dev/openglproj/build/CMakeFiles/geosim.dir/src/main.cpp.o"
   "/home/hollan/dev/openglproj/src/shader.cpp" "/home/hollan/dev/openglproj/build/CMakeFiles/geosim.dir/src/shader.cpp.o"
+  "/home/hollan/dev/openglproj/src/stb_image.cpp" "/home/hollan/dev/openglproj/build/CMakeFiles/geosim.dir/src/stb_image.cpp.o"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")
 
@@ -24,6 +26,7 @@ set(CMAKE_CXX_COMPILER_ID "GNU")
 set(CMAKE_CXX_TARGET_INCLUDE_PATH
   "/usr/local/include"
   "../include"
+  "../../filestut/data"
   )
 
 # Targets to which this target links.

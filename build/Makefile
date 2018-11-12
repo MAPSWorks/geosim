@@ -204,6 +204,33 @@ src/shader.cpp.s:
 	$(MAKE) -f CMakeFiles/geosim.dir/build.make CMakeFiles/geosim.dir/src/shader.cpp.s
 .PHONY : src/shader.cpp.s
 
+src/stb_image.o: src/stb_image.cpp.o
+
+.PHONY : src/stb_image.o
+
+# target to build an object file
+src/stb_image.cpp.o:
+	$(MAKE) -f CMakeFiles/geosim.dir/build.make CMakeFiles/geosim.dir/src/stb_image.cpp.o
+.PHONY : src/stb_image.cpp.o
+
+src/stb_image.i: src/stb_image.cpp.i
+
+.PHONY : src/stb_image.i
+
+# target to preprocess a source file
+src/stb_image.cpp.i:
+	$(MAKE) -f CMakeFiles/geosim.dir/build.make CMakeFiles/geosim.dir/src/stb_image.cpp.i
+.PHONY : src/stb_image.cpp.i
+
+src/stb_image.s: src/stb_image.cpp.s
+
+.PHONY : src/stb_image.s
+
+# target to generate assembly for a file
+src/stb_image.cpp.s:
+	$(MAKE) -f CMakeFiles/geosim.dir/build.make CMakeFiles/geosim.dir/src/stb_image.cpp.s
+.PHONY : src/stb_image.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -222,6 +249,9 @@ help:
 	@echo "... src/shader.o"
 	@echo "... src/shader.i"
 	@echo "... src/shader.s"
+	@echo "... src/stb_image.o"
+	@echo "... src/stb_image.i"
+	@echo "... src/stb_image.s"
 .PHONY : help
 
 

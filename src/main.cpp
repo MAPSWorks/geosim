@@ -3,12 +3,18 @@
 #include <GLFW/glfw3.h>
 #include "shader.hpp"
 #include <cmath>
-#define STB_IMAGE_IMPLEMENTATION
+//#define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+//gdal library
+#include <gdal.h>
+#include <gdal_priv.h>
+#include <ogrsf_frmts.h>
 //callback prototype for when the window changes
+#include "../../filestut/data/model.h"
+
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow *window);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
@@ -16,6 +22,9 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
     glViewport(0, 0, width, height);
 }
 
+//SETTINGS
+const unsigned int SCR_WIDTH = 800;
+const unsigned int SCR_HEIGHT = 600;
 
 int main()
 {
@@ -56,6 +65,8 @@ int main()
 	//Registering callbacks
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     
+    //configure global opengel state
+    glEnable(GL_DEPTH_TEST);
     //setup shader program
     unsigned int programID = loadShader();
     //new shader class
@@ -63,7 +74,44 @@ int main()
     int nrt;
     glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nrt); 
     std::cout << "Maximum nr of vertex attributes supported: " << nrt << std::endl; 
+    
+    if(!modelvert)
+    {
+        std::cout << "land model not loaded.....\n";
+    }
+    std::cout << "Size of modelvert: " << sizeof(modelvert) << "\n";
 
+    //LOADING GDAL DATASET
+    GDALDataset *poDataset;
+    GDALAllRegister();
+    poDataset = (GDALDataset*) GDALOpen("../../filestut/data/N055W004/N055W004_AVE_DSM.tif",GA_ReadOnly);
+    
+    // Lets get the dimensions of the tif
+    int gd_width = GDALGetRasterXSize(poDataset); 
+    int gd_height = GDALGetRasterYSize(poDataset);
+    
+    std::string proj;
+    proj = std::string(poDataset->GetProjectionRef());
+    
+    // Lets get the upper right hand corner of the tiff and its resolution
+    double adfGeoTransform[6];
+    if( poDataset->GetGeoTransform( adfGeoTransform ) == CE_None )
+    {
+        printf( "Origin = (%.6f,%.6f)\n",
+            adfGeoTransform[0], adfGeoTransform[3] );
+
+        printf( "Pixel Size = (%.6f,%.6f)\n",
+            adfGeoTransform[1], adfGeoTransform[5] );
+        double x = adfGeoTransform[0];
+        double y = adfGeoTransform[3];
+        double xright = x + adfGeoTransform[1]*gd_width;
+        double ybottom = y + adfGeoTransform[5]*gd_height;
+    }
+    else
+    {
+        std::cout << "Something went wrong!!";
+    }
+    //END OF GDAL SETUP
     //vertex array 
     float vertices[] = { 
         //positions      //color
@@ -78,12 +126,12 @@ int main()
         1,2,3
     };
     
-    unsigned int VBO, VAO, EBO;
+    unsigned int VBO, VAO, EBO, VAO2,VBO2;
     glGenVertexArrays(1,&VAO);
     glGenBuffers(1, &VBO);
     glGenBuffers(1, &EBO);
 
-    //Bind VBO first, then bind and set vertex buffer(s) and then configure vertex attributes
+    //Bind VAO first, then bind and set vertex buffer(s) and then configure vertex attributes
     glBindVertexArray(VAO);
     
     
@@ -164,18 +212,29 @@ int main()
     // You can unbind the VAO afterwards so other VAO calls won't accidentally modify this VAO, but this rarely happens. Modifying other
     // VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
     glBindVertexArray(0); 
+    glGenVertexArrays(1,&VAO2);
+    glGenBuffers(1,&VBO2);
 
+    glBindVertexArray(VAO2);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO2);
+    glBufferData(GL_ARRAY_BUFFER, 192, modelvert, GL_STATIC_DRAW);
 
+    //Setting attrib pointer
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    glBindVertexArray(0);
     // uncomment this call to draw in wireframe polygons.
-   // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+   glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     ourShader.use();
     ourShader.setInt("texture2",1);
 	while(!glfwWindowShouldClose(window))
 	{
 		//clear the color buffer
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
-		//input
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		//glClear(GL_COLOR_BUFFER_BIT);
+        //input
 		processInput(window);
         
         //bind Texture
@@ -188,37 +247,57 @@ int main()
         //Rendering
         //glUseProgram(programID);
         ourShader.use();
-        
+                
         //SETTING TRANSFORMATION MATRIX
+        /*
         glm::mat4 trans = glm::mat4(1.0f);
         trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
         trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
-        //trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
         //QUERY LOCATION IN SHADER PROGRAM
         unsigned int transformLoc = glGetUniformLocation(ourShader.ID, "transform");
-        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
-        /*float timeValue = glfwGetTime();
-        float greenValue = sin(timeValue) /2.0f + 0.5f;
-        int vertexColorLocation = glGetUniformLocation(programID, "ourColor");
-        glUniform4f(vertexColorLocation, 0.0f,greenValue, 0.0f,1.0f);*/
-
-        glBindVertexArray(VAO);
-        //glDrawArrays(GL_TRIANGLES, 0, 3);
+        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));*/
         
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+                // create transformations
+        glm::mat4 model = glm::mat4(1.0f);
+        glm::mat4 view = glm::mat4(1.0f);
+        glm::mat4 projection = glm::mat4(1.0f);
+        model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+        view  = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+        projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+        // retrieve the matrix uniform locations
+        unsigned int modelLoc = glGetUniformLocation(ourShader.ID, "model");
+        unsigned int viewLoc  = glGetUniformLocation(ourShader.ID, "view");
+        unsigned int projLoc  = glGetUniformLocation(ourShader.ID, "projection");
+        // pass them to the shaders (3 different ways)
+        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+        // note: currently we set the projection matrix each frame, but since the projection matrix rarely changes it's often best practice to set it outside the main loop only once.
+        //ourShader.setMat4("projection", projection);
+        glUniformMatrix4fv(projLoc,1,GL_FALSE, glm::value_ptr(projection));
+
+        glBindVertexArray(VAO2);
+        glDrawArrays(GL_POINTS, 0, 16);
+        
+        //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         
         //glBindVertexArray(0);
     	//glfw: swap buffers and poll IO events (keys pressed/released)
 		glfwSwapBuffers(window);
-    		glfwPollEvents();    
+    	glfwPollEvents();    
 	}
     // optional: de-allocate all resources once they've outlived their purpose:
     // ------------------------------------------------------------------------
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
     glDeleteBuffers(1, &EBO);
+
+    //Deleting landscape points
+    glDeleteVertexArrays(1,&VAO2);
+    glDeleteBuffers(1,&VBO2);
 	//clear resources that were allocated!
-	glfwTerminate();
+    glfwTerminate();
+    //delete the data array
+    delete[] modelvert;
 	return 0;
 }
 

@@ -8,13 +8,15 @@ set( PROJECT_LINK_LIBS libGL.so.1)
 #glfw library
 set( GLFW_LINK_LIBS libglfw.so )
 
+set( GDAL_LINK_LIBS libgdal.so )
+
 link_directories(/snap/gnome-3-26-1604/74/usr/lib/x86_64-linux-gnu/mesa/ /usr/local/lib/)
 
 #ADDING INCLUDE DIRECTORIES
-include_directories(/usr/local/include/ include)
+include_directories(/usr/local/include/ include ../filestut/data)
 
 file(GLOB SOURCES "src/*")
 
 add_executable(geosim ${SOURCES})
 
-target_link_libraries(geosim ${PROJECT_LINK_LIBS} ${GLFW_LINK_LIBS} ${CMAKE_DL_LIBS})
+target_link_libraries(geosim ${PROJECT_LINK_LIBS} ${GLFW_LINK_LIBS} ${GDAL_LINK_LIBS} ${CMAKE_DL_LIBS})

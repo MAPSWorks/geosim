@@ -71,13 +71,41 @@ CMakeFiles/geosim.dir/src/main.cpp.o
  ../include/glm/vector_relational.hpp
  ../include/shader.hpp
  ../include/stb_image.h
+ /home/hollan/dev/filestut/data/model.h
  /home/hollan/dev/openglproj/src/main.cpp
  /usr/local/include/GLFW/glfw3.h
  /usr/local/include/KHR/khrplatform.h
+ /usr/local/include/cpl_atomic_ops.h
+ /usr/local/include/cpl_config.h
+ /usr/local/include/cpl_conv.h
+ /usr/local/include/cpl_error.h
+ /usr/local/include/cpl_json.h
+ /usr/local/include/cpl_minixml.h
+ /usr/local/include/cpl_multiproc.h
+ /usr/local/include/cpl_port.h
+ /usr/local/include/cpl_progress.h
+ /usr/local/include/cpl_string.h
+ /usr/local/include/cpl_virtualmem.h
+ /usr/local/include/cpl_vsi.h
+ /usr/local/include/gdal.h
+ /usr/local/include/gdal_frmts.h
+ /usr/local/include/gdal_priv.h
+ /usr/local/include/gdal_version.h
  /usr/local/include/glad/glad.h
+ /usr/local/include/ogr_api.h
+ /usr/local/include/ogr_core.h
+ /usr/local/include/ogr_feature.h
+ /usr/local/include/ogr_featurestyle.h
+ /usr/local/include/ogr_geometry.h
+ /usr/local/include/ogr_spatialref.h
+ /usr/local/include/ogr_srs_api.h
+ /usr/local/include/ogrsf_frmts.h
 CMakeFiles/geosim.dir/src/shader.cpp.o
  ../include/shader.hpp
  /home/hollan/dev/openglproj/src/shader.cpp
  /usr/local/include/GLFW/glfw3.h
  /usr/local/include/KHR/khrplatform.h
  /usr/local/include/glad/glad.h
+CMakeFiles/geosim.dir/src/stb_image.cpp.o
+ ../include/stb_image.h
+ /home/hollan/dev/openglproj/src/stb_image.cpp

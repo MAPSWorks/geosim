@@ -2,6 +2,7 @@ file(REMOVE_RECURSE
   "CMakeFiles/geosim.dir/src/glad.c.o"
   "CMakeFiles/geosim.dir/src/main.cpp.o"
   "CMakeFiles/geosim.dir/src/shader.cpp.o"
+  "CMakeFiles/geosim.dir/src/stb_image.cpp.o"
   "geosim.pdb"
   "geosim"
 )

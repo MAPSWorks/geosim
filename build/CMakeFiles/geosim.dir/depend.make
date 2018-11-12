@@ -70,14 +70,42 @@ CMakeFiles/geosim.dir/src/main.cpp.o: ../include/glm/vec4.hpp
 CMakeFiles/geosim.dir/src/main.cpp.o: ../include/glm/vector_relational.hpp
 CMakeFiles/geosim.dir/src/main.cpp.o: ../include/shader.hpp
 CMakeFiles/geosim.dir/src/main.cpp.o: ../include/stb_image.h
+CMakeFiles/geosim.dir/src/main.cpp.o: /home/hollan/dev/filestut/data/model.h
 CMakeFiles/geosim.dir/src/main.cpp.o: ../src/main.cpp
 CMakeFiles/geosim.dir/src/main.cpp.o: /usr/local/include/GLFW/glfw3.h
 CMakeFiles/geosim.dir/src/main.cpp.o: /usr/local/include/KHR/khrplatform.h
+CMakeFiles/geosim.dir/src/main.cpp.o: /usr/local/include/cpl_atomic_ops.h
+CMakeFiles/geosim.dir/src/main.cpp.o: /usr/local/include/cpl_config.h
+CMakeFiles/geosim.dir/src/main.cpp.o: /usr/local/include/cpl_conv.h
+CMakeFiles/geosim.dir/src/main.cpp.o: /usr/local/include/cpl_error.h
+CMakeFiles/geosim.dir/src/main.cpp.o: /usr/local/include/cpl_json.h
+CMakeFiles/geosim.dir/src/main.cpp.o: /usr/local/include/cpl_minixml.h
+CMakeFiles/geosim.dir/src/main.cpp.o: /usr/local/include/cpl_multiproc.h
+CMakeFiles/geosim.dir/src/main.cpp.o: /usr/local/include/cpl_port.h
+CMakeFiles/geosim.dir/src/main.cpp.o: /usr/local/include/cpl_progress.h
+CMakeFiles/geosim.dir/src/main.cpp.o: /usr/local/include/cpl_string.h
+CMakeFiles/geosim.dir/src/main.cpp.o: /usr/local/include/cpl_virtualmem.h
+CMakeFiles/geosim.dir/src/main.cpp.o: /usr/local/include/cpl_vsi.h
+CMakeFiles/geosim.dir/src/main.cpp.o: /usr/local/include/gdal.h
+CMakeFiles/geosim.dir/src/main.cpp.o: /usr/local/include/gdal_frmts.h
+CMakeFiles/geosim.dir/src/main.cpp.o: /usr/local/include/gdal_priv.h
+CMakeFiles/geosim.dir/src/main.cpp.o: /usr/local/include/gdal_version.h
 CMakeFiles/geosim.dir/src/main.cpp.o: /usr/local/include/glad/glad.h
+CMakeFiles/geosim.dir/src/main.cpp.o: /usr/local/include/ogr_api.h
+CMakeFiles/geosim.dir/src/main.cpp.o: /usr/local/include/ogr_core.h
+CMakeFiles/geosim.dir/src/main.cpp.o: /usr/local/include/ogr_feature.h
+CMakeFiles/geosim.dir/src/main.cpp.o: /usr/local/include/ogr_featurestyle.h
+CMakeFiles/geosim.dir/src/main.cpp.o: /usr/local/include/ogr_geometry.h
+CMakeFiles/geosim.dir/src/main.cpp.o: /usr/local/include/ogr_spatialref.h
+CMakeFiles/geosim.dir/src/main.cpp.o: /usr/local/include/ogr_srs_api.h
+CMakeFiles/geosim.dir/src/main.cpp.o: /usr/local/include/ogrsf_frmts.h
 
 CMakeFiles/geosim.dir/src/shader.cpp.o: ../include/shader.hpp
 CMakeFiles/geosim.dir/src/shader.cpp.o: ../src/shader.cpp
 CMakeFiles/geosim.dir/src/shader.cpp.o: /usr/local/include/GLFW/glfw3.h
 CMakeFiles/geosim.dir/src/shader.cpp.o: /usr/local/include/KHR/khrplatform.h
 CMakeFiles/geosim.dir/src/shader.cpp.o: /usr/local/include/glad/glad.h
+
+CMakeFiles/geosim.dir/src/stb_image.cpp.o: ../include/stb_image.h
+CMakeFiles/geosim.dir/src/stb_image.cpp.o: ../src/stb_image.cpp
 
