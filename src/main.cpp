@@ -1,3 +1,4 @@
+#include <vector>
 #include <iostream>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -12,6 +13,7 @@
 #include <gdal.h>
 #include <gdal_priv.h>
 #include <ogrsf_frmts.h>
+#include <cpl_conv.h>
 //callback prototype for when the window changes
 #include "../../filestut/data/model.h"
 
@@ -22,6 +24,252 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
     glViewport(0, 0, width, height);
 }
 
+//GLAL FUNCTIONS
+void transformToUtm(double& x, double& y)
+{
+    OGRSpatialReference    oUTM, *poLatLong;
+    OGRCoordinateTransformation *poTransform;
+
+    oUTM.SetProjCS("UTM 11 / WGS84");
+    oUTM.SetWellKnownGeogCS( "WGS84" );
+    oUTM.SetUTM( 11 );
+
+    poLatLong = oUTM.CloneGeogCS();
+    
+    poTransform = OGRCreateCoordinateTransformation( poLatLong, &oUTM );
+    if( poTransform == NULL )
+    {
+        return;
+    }
+    
+
+    if( !poTransform->Transform( 1, &x, &y) )
+    {
+      // Error here
+    }
+};
+
+void ComputeGeoProperties(GDALDataset *poDataset, int width, int height, double& x, double& y,double& xright, double& ybottom, double& xres, double& yres)
+{
+    double adfGeoTransform[6];
+    if( poDataset->GetGeoTransform( adfGeoTransform ) == CE_None )
+    {
+        printf( "Origin = (%.6f,%.6f)\n",
+                adfGeoTransform[0], adfGeoTransform[3] );
+
+        printf( "Pixel Size = (%.6f,%.6f)\n",
+                adfGeoTransform[1], adfGeoTransform[5] );
+        x = adfGeoTransform[0];
+        y = adfGeoTransform[3];
+        xright = x + adfGeoTransform[1]*width;
+        ybottom = y + adfGeoTransform[5]*height;
+    }
+    else
+    {
+      return;
+    }
+
+    std::string proj;
+    proj = std::string(poDataset->GetProjectionRef());
+
+    OGRSpatialReference sr2;
+    const char* test = &proj[0];
+    sr2.importFromWkt(&test);
+    
+    // Get Geography Coordinate System clone
+    OGRSpatialReference* geog2 = sr2.CloneGeogCS(); 
+
+    // Now to create coordinate transform function
+    OGRCoordinateTransformation* poTransform2 = OGRCreateCoordinateTransformation( &sr2, geog2 );
+
+    // Compute corners
+    poTransform2->Transform(1,&x,&y);
+    poTransform2->Transform(1,&xright,&ybottom);
+
+    // Transform to utm on both corners
+    transformToUtm(x,y);
+    transformToUtm(xright,ybottom);
+    std::cout << xright << " " << ybottom <<std::endl;
+    
+    // Lets compute the absolute width and height in utm
+    double absoluteW = xright - x;
+    double absoluteH = y - ybottom;
+
+    // now lets compute the average resolution (in utm) of the DEM
+    xres = absoluteW / width;
+    yres = absoluteH / height;
+};
+
+glm::vec3 ComputeNormal(glm::vec3 center, int i, int j, int width, int height,std::vector<std::vector<float>>& data, float Max, float xres, float yres );
+
+struct Vertex
+{
+    glm::vec3 position; // where each dot is located
+    glm::vec3 normal; // the normal for this dot
+    glm::vec2 uv; // uvs for texture coordinate mapping
+};
+
+void createMesh(std::vector<std::vector<float>>& input,float xres, float yres,float max,std::vector<int>& indexs, std::vector<Vertex>& vectors)
+{
+  // Our vertex information along with normals contained inside
+  //std::vector<Vertex> vectors = std::vector<Vertex>();
+
+  // Lets do some index rendering because it will save us some memory to some degree
+  //std::vector<int> indexs = std::vector<int>();
+
+  // Time to construct a height map based on the xres and yres for each group of four dots
+  for(int i = 0; i < input.size()-1; i++)
+  {
+    for(int j = 0; j < input[i].size()-1; j++)
+    {  
+
+        float UL = (float)(input[i][j])/(float)(max); // Upper left
+        float LL = (float)(input[i+1][j])/(float)(max); // Lower left
+        float UR = (float)(input[i][j+1])/(float)(max); // Upper right
+        float LR = (float)(input[i+1][j+1])/(float)(max); // Lower right
+
+        if(UL <= 0)
+        {
+          UL = 0;
+        }
+        
+        if(UR <= 0)
+        {
+          UR = 0;
+        }
+
+        if(LR <= 0)
+        {
+          LR = 0;
+        }
+
+        if(LL <= 0)
+        {
+          LL = 0;
+        }
+        
+        glm::vec3 ULV = {i*xres,UL*max,j*yres};
+        glm::vec3 LLV = {(i+1)*xres,LL*max,j*yres};
+        glm::vec3 URV = {i*xres,UR*max,(j+1)*yres};
+        glm::vec3 LRV = {(i+1)*xres,LR*max,(j+1)*yres};
+
+        // compute smoothed normal
+        glm::vec3 a = ComputeNormal(ULV,i,j,input.size(),input[i].size(),input,max,xres,yres);
+        glm::vec3 b = ComputeNormal(LLV,i+1,j,input.size(),input[i].size(),input,max,xres,yres);
+        glm::vec3 c = ComputeNormal(URV,i,j+1,input.size(),input[i].size(),input,max,xres,yres);
+        glm::vec3 d = ComputeNormal(LRV,i+1,j+1,input.size(),input[i].size(),input,max,xres,yres);
+
+        // Push back vector information for these group of dots
+        vectors.push_back(Vertex{ {i*xres,UL,j*yres}, a, {(float)i/(float)input.size(),(float)j/(float)input[i].size()} } );
+        vectors.push_back(Vertex{ {(i+1)*xres,LL,j*yres}, b, {(float)(i+1)/(float)input.size(),(float)j/(float)input[i].size()} } );
+        vectors.push_back(Vertex{ {i*xres,UR,(j+1)*yres}, c, {(float)i/(float)input.size(),(float)(j+1)/(float)input[i].size()} } );
+        vectors.push_back(Vertex{ {(i+1)*xres,LR,(j+1)*yres}, d, {(float)(i+1)/(float)input.size(),(float)(j+1)/(float)input[i].size()} } );
+
+        // Push back indices for these verticies
+        indexs.push_back(vectors.size() - 4);
+        indexs.push_back(vectors.size() - 1);
+        indexs.push_back(vectors.size() - 2);
+        indexs.push_back(vectors.size() - 4);
+        indexs.push_back(vectors.size() - 3);
+        indexs.push_back(vectors.size() - 1);
+        
+    }
+  }
+}
+glm::vec3 ComputeNormal(glm::vec3 center, int i, int j, int width, int height,std::vector<std::vector<float>>& data, float Max, float xres, float yres )
+{
+  // Compute center of all values which is the i and j passed in
+    glm::vec3 left;
+    glm::vec3 right;
+    glm::vec3 up;
+    glm::vec3 down;
+    glm::vec3 sum = glm::vec3(0,0,0);
+    bool l = false;
+    bool r = false;
+    bool u = false;
+    bool d = false;
+
+    int count = 0;
+  // Compute left
+    if(i -1 >= 0)
+    {
+        left = glm::vec3((i-1)*xres,data[i-1][j],j*yres);
+        left = center - left;
+        l = true;
+    }
+
+    // Compute right
+    if(i+1 < width)
+    {
+        right = glm::vec3((i+1)*xres,data[i+1][j],j*yres);
+        right = center - right;
+        r = true;
+    }
+
+    // Compute up
+    if(j-1 >= 0)
+    {
+        up = glm::vec3((i)*xres,data[i][j-1],(j-1)*yres);
+        up = center-up;
+        u = true;
+    }
+
+    // Compute down
+    if(j+1 < height)
+    {
+        down = glm::vec3((i)*xres,data[i][j+1],(j+1)*yres);
+        down = center-down;
+        d = true;
+    }
+
+    // Compute normals
+    if(u  && r)
+    {
+        glm::vec3 v1 = glm::cross(up,right);
+        if(v1.y < 0)
+        {
+            v1 *= -1;
+        }
+        sum += v1;
+        count = count + 1;
+    }
+    if(u && l)
+    {
+        glm::vec3 v1 = glm::cross(up,left);
+        if(v1.y < 0)
+        {
+            v1 *= -1;
+        }
+        sum += v1;
+        count = count + 1;
+    }
+    if(d && r)
+    {
+        glm::vec3 v1 = glm::cross(down,right);
+        if(v1.y < 0)
+        {
+            v1 *= -1;
+        }
+        sum += v1;
+        count = count + 1;
+    }
+    if(d && l)
+    {
+        glm::vec3 v1 = glm::cross(down,left);
+        if(v1.y < 0)
+        {
+            v1 *= -1;
+        }
+        sum += v1;
+        count = count + 1;
+    }
+
+    // Compute average normal
+    sum /= count;
+  
+    // Normalize it and return :D!!!! Enjoy your smoothed normal for some smooth shading!
+    return glm::normalize(sum);
+}
 //SETTINGS
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
@@ -84,17 +332,19 @@ int main()
     //LOADING GDAL DATASET
     GDALDataset *poDataset;
     GDALAllRegister();
-    poDataset = (GDALDataset*) GDALOpen("../../filestut/data/N055W004/N055W004_AVE_DSM.tif",GA_ReadOnly);
+    poDataset = (GDALDataset*) GDALOpen("../../filestut/data/N055W004/N055W004_AVE_DSM_converted.tif",GA_ReadOnly);
     
     // Lets get the dimensions of the tif
     int gd_width = GDALGetRasterXSize(poDataset); 
     int gd_height = GDALGetRasterYSize(poDataset);
-    
+    double x,y,xright,ybottom,xres,yres;
+
+
     std::string proj;
     proj = std::string(poDataset->GetProjectionRef());
-    
+    std::cout << "Projection: " << proj << "\n";    
     // Lets get the upper right hand corner of the tiff and its resolution
-    double adfGeoTransform[6];
+    /*double adfGeoTransform[6];
     if( poDataset->GetGeoTransform( adfGeoTransform ) == CE_None )
     {
         printf( "Origin = (%.6f,%.6f)\n",
@@ -110,7 +360,78 @@ int main()
     else
     {
         std::cout << "Something went wrong!!";
+    }*/
+    
+    //get number of bands
+    int numBands = poDataset->GetRasterCount();
+    std::cout << "There are: " << numBands <<"\n";
+    
+    float min,max;
+    int bGotMin, bGotMax;
+    double adfMinMax[2];
+
+    GDALRasterBand  *poBand;
+
+    poBand = poDataset->GetRasterBand(1);
+    
+    //Get the Min and Max
+    min = adfMinMax[0] = poBand->GetMinimum( &bGotMin );
+    max = adfMinMax[1] = poBand->GetMaximum( &bGotMax );
+    //Dataset dimensions
+    int bandWidth = poBand->GetXSize();
+    int bandHeight = poBand->GetYSize();
+    // Get first raster band
+    std::cout << "First band width: " << bandWidth << "\n";
+    std::cout << "Tiff width: " << gd_width << "\n";
+    
+    float *pafScanline;
+    pafScanline = (float *) CPLMalloc(sizeof(float)*bandWidth*bandHeight);
+    
+    if(!pafScanline){std::cout << "No memory allocated!";}
+    //RasterIO will load the data
+    auto err = poBand->RasterIO(GF_Read,0,0,bandWidth,bandHeight,pafScanline,bandWidth,bandHeight,GDT_Float32,0,0);
+    std::vector<std::vector<float>> out = std::vector<std::vector<float>>(bandWidth,std::vector<float> (bandHeight,0));
+    
+    // move everything to a vector -- slow memory but okay for what we are doing especially when zeroing out zero values
+    for(int i = 0; i < bandWidth; i++)
+    {
+        for(int j = 0; j < bandHeight; j++)
+        {
+            if(pafScanline[(i)*bandWidth+j] > 0)
+                out[i][j] = pafScanline[(i)*bandWidth+j];
+            else
+                out[i][j] = 0;
+        }
     }
+    //For storing vertix informmation
+    // Our vertex information along with normals contained inside
+    std::vector<Vertex> vertexes = std::vector<Vertex>();
+
+    // Lets do some index rendering because it will save us some memory to some degree
+    std::vector<int> indicies = std::vector<int>();
+    //computations
+    ComputeGeoProperties(poDataset,gd_width,gd_height,x,y,xright,ybottom,xres,yres);
+    //Create mesh
+    createMesh(out,xres,yres,max,indicies,vertexes);
+    
+    //Generating buffers VAO, VBO and EBO
+    unsigned int VAO_gdal, VBO_gdal, EBO_gdal;
+    glGenVertexArrays(1,&VAO_gdal);
+    glGenBuffers(1,&VBO_gdal);
+    glGenBuffers(1,&EBO_gdal);
+    
+    glBindVertexArray(VAO_gdal);
+    
+    glBindBuffer(GL_ARRAY_BUFFER, VBO_gdal);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex)*vertexes.size(), &vertexes[0], GL_STATIC_DRAW);
+    
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO_gdal);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(int)*indicies.size(), &indicies[0], GL_STATIC_DRAW);
+    
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(Vertex), (void*)0);
+    glEnableVertexAttribArray(0);
+    //unbind array object for gdal data
+    glBindVertexArray(0);
     //END OF GDAL SETUP
     //vertex array 
     float vertices[] = { 
@@ -275,9 +596,16 @@ int main()
         //ourShader.setMat4("projection", projection);
         glUniformMatrix4fv(projLoc,1,GL_FALSE, glm::value_ptr(projection));
 
-        glBindVertexArray(VAO2);
-        glDrawArrays(GL_POINTS, 0, 16);
+        //glBindVertexArray(VAO2);
+        //glDrawArrays(GL_POINTS, 0, 16);
         
+        glBindVertexArray(VAO_gdal);
+        glDrawElements(
+     		GL_TRIANGLES,      // mode
+     		indicies.size(),    // count
+     		GL_UNSIGNED_INT,   // type
+     		(void*)0           // element array buffer offset
+ 		);
         //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         
         //glBindVertexArray(0);
@@ -294,6 +622,12 @@ int main()
     //Deleting landscape points
     glDeleteVertexArrays(1,&VAO2);
     glDeleteBuffers(1,&VBO2);
+	
+	//Deleting gdal resources
+	glDeleteVertexArrays(1, &VAO_gdal);
+	glDeleteBuffers(1, &VBO_gdal);
+	glDeleteBuffers(1, &EBO_gdal);
+	
 	//clear resources that were allocated!
     glfwTerminate();
     //delete the data array
